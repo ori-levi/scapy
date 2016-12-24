@@ -4,24 +4,21 @@
 Scapy *BSD native support - core
 """
 
-from scapy.config import conf
-from scapy.error import Scapy_Exception
-from scapy.data import ARPHDR_LOOPBACK, ARPHDR_ETHER
-from scapy.arch.common import get_if
-from scapy.arch.consts import LOOPBACK_NAME
-from scapy.utils import warning
-
-from scapy.arch.bpf.consts import *
-
+import fcntl
 import os
 import socket
-import fcntl
 import struct
-
-from ctypes import cdll, cast, pointer, POINTER, Structure
 from ctypes import c_uint, c_uint32, c_int, c_ulong, c_char_p, c_ushort, c_ubyte
+from ctypes import cdll, cast, pointer, POINTER, Structure
 from ctypes.util import find_library
 
+from scapy.arch.bpf.consts import *
+from scapy.arch.common import get_if
+from scapy.arch.consts import LOOPBACK_NAME
+from scapy.config import conf
+from scapy.data import ARPHDR_LOOPBACK, ARPHDR_ETHER
+from scapy.error import Scapy_Exception
+from scapy.utils import warning
 
 # ctypes definitions
 
@@ -68,7 +65,7 @@ def get_if_raw_addr(ifname):
 def get_if_raw_hwaddr(ifname):
     """Returns the packed MAC address configured on 'ifname'."""
 
-    NULL_MAC_ADDRESS = '\x00'*6
+    NULL_MAC_ADDRESS = '\x00' * 6
 
     # Handle the loopback interface separately
     if ifname == LOOPBACK_NAME:
@@ -83,8 +80,8 @@ def get_if_raw_hwaddr(ifname):
 
     # Get MAC addresses
     addresses = [l for l in fd.readlines() if l.find("ether") >= 0 or
-                                              l.find("lladdr") >= 0 or
-                                              l.find("address") >= 0]
+                 l.find("lladdr") >= 0 or
+                 l.find("address") >= 0]
     if not addresses:
         raise Scapy_Exception("No MAC address found on %s !" % ifname)
 
@@ -114,7 +111,8 @@ def attach_filter(fd, iface, bpf_filter_string):
     """Attach a BPF filter to the BPF file descriptor"""
 
     # Retrieve the BPF byte code in decimal
-    command = "%s -i %s -ddd -s 1600 '%s'" % (conf.prog.tcpdump, iface, bpf_filter_string)
+    command = "%s -i %s -ddd -s 1600 '%s'" % (
+    conf.prog.tcpdump, iface, bpf_filter_string)
     try:
         f = os.popen(command)
     except OSError, msg:
@@ -159,7 +157,7 @@ def get_if_list():
 
     # Get interfaces
     interfaces = [line[:line.find(':')] for line in fd.readlines()
-                                        if ": flags" in line.lower()]
+                  if ": flags" in line.lower()]
     return interfaces
 
 
@@ -209,7 +207,7 @@ def get_working_ifaces():
 
     # Sort to mimic pcap_findalldevs() order
     interfaces.sort(lambda (ifname_left, ifid_left),
-                        (ifname_right, ifid_right): ifid_left-ifid_right)
+                           (ifname_right, ifid_right): ifid_left - ifid_right)
     return interfaces
 
 

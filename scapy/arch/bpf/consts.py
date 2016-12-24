@@ -4,9 +4,7 @@
 Scapy *BSD native support - constants
 """
 
-
 from scapy.data import MTU
-
 
 SIOCGIFFLAGS = 0xc0206911
 BPF_BUFFER_LENGTH = MTU

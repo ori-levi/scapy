@@ -47,7 +47,7 @@ class ASN1F_field(ASN1F_element):
         self.flexible_tag = flexible_tag
         if (implicit_tag is not None) and (explicit_tag is not None):
             err_msg = "field cannot be both implicitly and explicitly tagged"
-            raise ASN1_Error(err_msg)
+            raise ASN1Error(err_msg)
         self.implicit_tag = implicit_tag
         self.explicit_tag = explicit_tag
         # network_tag gets useful for ASN1F_CHOICE
@@ -97,7 +97,7 @@ class ASN1F_field(ASN1F_element):
                  or self.ASN1_tag == x.tag ):
                 s = x.enc(pkt.ASN1_codec)
             else:
-                raise ASN1_Error("Encoding Error: got %r instead of an %r for field [%s]" % (x, self.ASN1_tag, self.name))
+                raise ASN1Error("Encoding Error: got %r instead of an %r for field [%s]" % (x, self.ASN1_tag, self.name))
         else:
             s = self.ASN1_tag.get_codec(pkt.ASN1_codec).enc(x)
         return BER_tagging_enc(s, implicit_tag=self.implicit_tag,
@@ -394,13 +394,13 @@ class ASN1F_optional(ASN1F_element):
     def m2i(self, pkt, s):
         try:
             return self._field.m2i(pkt, s)
-        except (ASN1_Error, ASN1F_badsequence, BER_Decoding_Error):
+        except (ASN1Error, ASN1F_badsequence, BER_Decoding_Error):
             # ASN1_Error may be raised by ASN1F_CHOICE
             return None, s
     def dissect(self, pkt, s):
         try:
             return self._field.dissect(pkt, s)
-        except (ASN1_Error, ASN1F_badsequence, BER_Decoding_Error):
+        except (ASN1Error, ASN1F_badsequence, BER_Decoding_Error):
             self._field.set_val(pkt, None)
             return s
     def build(self, pkt):
@@ -423,7 +423,7 @@ class ASN1F_CHOICE(ASN1F_field):
     def __init__(self, name, default, *args, **kwargs):
         if "implicit_tag" in kwargs:
             err_msg = "ASN1F_CHOICE has been called with an implicit_tag"
-            raise ASN1_Error(err_msg)
+            raise ASN1Error(err_msg)
         self.implicit_tag = None
         for kwarg in ["context", "explicit_tag"]:
             if kwarg in kwargs:
@@ -450,14 +450,14 @@ class ASN1F_CHOICE(ASN1F_field):
                     self.choices[p.network_tag] = p
                     self.pktchoices[hash(p.cls)] = (p.implicit_tag, p.explicit_tag)
             else:
-                raise ASN1_Error("ASN1F_CHOICE: no tag found for one field")
+                raise ASN1Error("ASN1F_CHOICE: no tag found for one field")
     def m2i(self, pkt, s):
         """
         First we have to retrieve the appropriate choice.
         Then we extract the field/packet, according to this choice.
         """
         if len(s) == 0:
-            raise ASN1_Error("ASN1F_CHOICE: got empty string")
+            raise ASN1Error("ASN1F_CHOICE: got empty string")
         _,s = BER_tagging_dec(s, hidden_tag=self.ASN1_tag,
                               explicit_tag=self.explicit_tag)
         tag,_ = BER_id_dec(s)
@@ -465,7 +465,7 @@ class ASN1F_CHOICE(ASN1F_field):
             if self.flexible_tag:
                 choice = ASN1F_field
             else:
-                raise ASN1_Error("ASN1F_CHOICE: unexpected field")
+                raise ASN1Error("ASN1F_CHOICE: unexpected field")
         else:
             choice = self.choices[tag]
         if hasattr(choice, "ASN1_root"):

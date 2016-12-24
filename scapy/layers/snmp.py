@@ -148,14 +148,14 @@ SNMP_trap_types = { 0: "cold_start",
                     }
 
 class SNMPvarbind(ASN1_Packet):
-    ASN1_codec = ASN1_Codecs.BER
+    ASN1_codec = ASN1Codecs.BER
     ASN1_root = ASN1F_SEQUENCE( ASN1F_OID("oid","1.3"),
                                 ASN1F_field("value",ASN1_NULL(0))
                                 )
 
 
 class SNMPget(ASN1_Packet):
-    ASN1_codec = ASN1_Codecs.BER
+    ASN1_codec = ASN1Codecs.BER
     ASN1_root = ASN1F_SNMP_PDU_GET( ASN1F_INTEGER("id",0),
                                     ASN1F_enum_INTEGER("error",0, SNMP_error),
                                     ASN1F_INTEGER("error_index",0),
@@ -163,7 +163,7 @@ class SNMPget(ASN1_Packet):
                                     )
 
 class SNMPnext(ASN1_Packet):
-    ASN1_codec = ASN1_Codecs.BER
+    ASN1_codec = ASN1Codecs.BER
     ASN1_root = ASN1F_SNMP_PDU_NEXT( ASN1F_INTEGER("id",0),
                                      ASN1F_enum_INTEGER("error",0, SNMP_error),
                                      ASN1F_INTEGER("error_index",0),
@@ -171,7 +171,7 @@ class SNMPnext(ASN1_Packet):
                                      )
 
 class SNMPresponse(ASN1_Packet):
-    ASN1_codec = ASN1_Codecs.BER
+    ASN1_codec = ASN1Codecs.BER
     ASN1_root = ASN1F_SNMP_PDU_RESPONSE( ASN1F_INTEGER("id",0),
                                          ASN1F_enum_INTEGER("error",0, SNMP_error),
                                          ASN1F_INTEGER("error_index",0),
@@ -179,7 +179,7 @@ class SNMPresponse(ASN1_Packet):
                                          )
 
 class SNMPset(ASN1_Packet):
-    ASN1_codec = ASN1_Codecs.BER
+    ASN1_codec = ASN1Codecs.BER
     ASN1_root = ASN1F_SNMP_PDU_SET( ASN1F_INTEGER("id",0),
                                     ASN1F_enum_INTEGER("error",0, SNMP_error),
                                     ASN1F_INTEGER("error_index",0),
@@ -187,7 +187,7 @@ class SNMPset(ASN1_Packet):
                                     )
     
 class SNMPtrapv1(ASN1_Packet):
-    ASN1_codec = ASN1_Codecs.BER
+    ASN1_codec = ASN1Codecs.BER
     ASN1_root = ASN1F_SNMP_PDU_TRAPv1( ASN1F_OID("enterprise", "1.3"),
                                        ASN1F_IPADDRESS("agent_addr","0.0.0.0"),
                                        ASN1F_enum_INTEGER("generic_trap", 0, SNMP_trap_types),
@@ -197,7 +197,7 @@ class SNMPtrapv1(ASN1_Packet):
                                        )
 
 class SNMPbulk(ASN1_Packet):
-    ASN1_codec = ASN1_Codecs.BER
+    ASN1_codec = ASN1Codecs.BER
     ASN1_root = ASN1F_SNMP_PDU_BULK( ASN1F_INTEGER("id",0),
                                      ASN1F_INTEGER("non_repeaters",0),
                                      ASN1F_INTEGER("max_repetitions",0),
@@ -205,7 +205,7 @@ class SNMPbulk(ASN1_Packet):
                                      )
     
 class SNMPinform(ASN1_Packet):
-    ASN1_codec = ASN1_Codecs.BER
+    ASN1_codec = ASN1Codecs.BER
     ASN1_root = ASN1F_SNMP_PDU_INFORM( ASN1F_INTEGER("id",0),
                                        ASN1F_enum_INTEGER("error",0, SNMP_error),
                                        ASN1F_INTEGER("error_index",0),
@@ -213,7 +213,7 @@ class SNMPinform(ASN1_Packet):
                                        )
     
 class SNMPtrapv2(ASN1_Packet):
-    ASN1_codec = ASN1_Codecs.BER
+    ASN1_codec = ASN1Codecs.BER
     ASN1_root = ASN1F_SNMP_PDU_TRAPv2( ASN1F_INTEGER("id",0),
                                        ASN1F_enum_INTEGER("error",0, SNMP_error),
                                        ASN1F_INTEGER("error_index",0),
@@ -222,7 +222,7 @@ class SNMPtrapv2(ASN1_Packet):
     
 
 class SNMP(ASN1_Packet):
-    ASN1_codec = ASN1_Codecs.BER
+    ASN1_codec = ASN1Codecs.BER
     ASN1_root = ASN1F_SEQUENCE(
         ASN1F_enum_INTEGER("version", 1, {0:"v1", 1:"v2c", 2:"v2", 3:"v3"}),
         ASN1F_STRING("community","public"),

@@ -4,26 +4,25 @@
 Scapy *BSD native support - BPF sockets
 """
 
-from scapy.config import conf
-from scapy.error import Scapy_Exception
-from scapy.supersocket import SuperSocket
-from scapy.layers.l2 import Ether
-from scapy.layers.inet import IP
-from scapy.layers.inet6 import IPv6
-from scapy.packet import Raw
-from scapy.data import ETH_P_ALL
-from scapy.arch.consts import FREEBSD, OPENBSD, NETBSD
-from scapy.utils import warning
-
-from scapy.arch.bpf.core import get_dev_bpf, attach_filter
-from scapy.arch.bpf.consts import *
-
-import struct
-import fcntl
 import os
 import time
 import errno
+import fcntl
+import struct
+
 from select import select
+from scapy.packet import Raw
+from scapy.config import conf
+from scapy.utils import warning
+from scapy.data import ETH_P_ALL
+from scapy.layers.inet import IP
+from scapy.layers.l2 import Ether
+from scapy.layers.inet6 import IPv6
+from scapy.arch.bpf.consts import *
+from scapy.error import Scapy_Exception
+from scapy.supersocket import SuperSocket
+from scapy.arch.consts import FREEBSD, OPENBSD, NETBSD
+from scapy.arch.bpf.core import get_dev_bpf, attach_filter
 
 
 # SuperSockets definitions
@@ -37,7 +36,9 @@ class _L2bpfSocket(SuperSocket):
     ins = None
     closed = False
 
-    def __init__(self, iface=None, type=ETH_P_ALL, promisc=None, filter=None, nofilter=0):
+    def __init__(self, iface=None, type=ETH_P_ALL, promisc=None, filter=None,
+                 nofilter=0):
+        super(_L2bpfSocket, self).__init__()
 
         # SuperSocket mandatory variables
         if promisc is None:
@@ -56,7 +57,8 @@ class _L2bpfSocket(SuperSocket):
 
         # Set the BPF buffer length
         try:
-            fcntl.ioctl(self.ins, BIOCSBLEN, struct.pack('I', BPF_BUFFER_LENGTH))
+            fcntl.ioctl(self.ins, BIOCSBLEN,
+                        struct.pack('I', BPF_BUFFER_LENGTH))
         except IOError, err:
             msg = "BIOCSBLEN failed on /dev/bpf%i" % self.dev_bpf
             raise Scapy_Exception(msg)
@@ -230,7 +232,8 @@ class L2bpfListenSocket(_L2bpfSocket):
             BPF_ALIGNMENT = 4  # sizeof(int32_t)
 
         x = bh_h + bh_c
-        return ((x)+(BPF_ALIGNMENT-1)) & ~(BPF_ALIGNMENT-1)  # from <net/bpf.h>
+        return ((x) + (BPF_ALIGNMENT - 1)) & ~(
+        BPF_ALIGNMENT - 1)  # from <net/bpf.h>
 
     def extract_frames(self, bpf_buffer):
         """Extract all frames from the buffer and stored them in the received list."""
@@ -249,16 +252,19 @@ class L2bpfListenSocket(_L2bpfSocket):
             bh_tstamp_offset = 8
 
         # Parse the BPF header
-        bh_caplen = struct.unpack('I', bpf_buffer[bh_tstamp_offset:bh_tstamp_offset+4])[0]
+        bh_caplen = \
+        struct.unpack('I', bpf_buffer[bh_tstamp_offset:bh_tstamp_offset + 4])[0]
         next_offset = bh_tstamp_offset + 4
-        bh_datalen = struct.unpack('I', bpf_buffer[next_offset:next_offset+4])[0]
+        bh_datalen = \
+        struct.unpack('I', bpf_buffer[next_offset:next_offset + 4])[0]
         next_offset += 4
-        bh_hdrlen = struct.unpack('H', bpf_buffer[next_offset:next_offset+2])[0]
+        bh_hdrlen = struct.unpack('H', bpf_buffer[next_offset:next_offset + 2])[
+            0]
         if bh_datalen == 0:
             return
 
         # Get and store the Scapy object
-        frame_str = bpf_buffer[bh_hdrlen:bh_hdrlen+bh_caplen]
+        frame_str = bpf_buffer[bh_hdrlen:bh_hdrlen + bh_caplen]
         try:
             pkt = self.guessed_cls(frame_str)
         except:
@@ -318,7 +324,6 @@ class L2bpfSocket(L2bpfListenSocket):
 
 
 class L3bpfSocket(L2bpfSocket):
-
     def send(self, pkt):
         """Send a packet"""
 
@@ -340,7 +345,7 @@ class L3bpfSocket(L2bpfSocket):
             self.assigned_interface = iff
 
         # Build the frame
-        frame = str(self.guessed_cls()/pkt)
+        frame = str(self.guessed_cls() / pkt)
         pkt.sent_time = time.time()
 
         # Send the frame
@@ -351,7 +356,9 @@ class L3bpfSocket(L2bpfSocket):
 
 def isBPFSocket(obj):
     """Return True is obj is a BPF Super Socket"""
-    return isinstance(obj, L2bpfListenSocket) or isinstance(obj, L2bpfListenSocket) or isinstance(obj, L3bpfSocket)
+    return isinstance(obj, L2bpfListenSocket) or isinstance(obj,
+                                                            L2bpfListenSocket) or isinstance(
+        obj, L3bpfSocket)
 
 
 def bpf_select(fds_list, timeout=None):

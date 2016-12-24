@@ -11,7 +11,7 @@ Basic Encoding Rules (BER) for ASN.1
 
 from scapy.error import warning
 from scapy.utils import binrepr,inet_aton,inet_ntoa
-from scapy.asn1.asn1 import ASN1_Decoding_Error,ASN1_Encoding_Error,ASN1_BadTag_Decoding_Error,ASN1_Codecs,ASN1_Class_UNIVERSAL,ASN1_Error,ASN1_DECODING_ERROR,ASN1_BADTAG
+from scapy.asn1.asn1 import ASN1DecodingError,ASN1EncodingError,ASN1BadTagDecodingError,ASN1Codecs,ASN1_Class_UNIVERSAL,ASN1Error,ASN1_DECODING_ERROR,ASN1_BADTAG
 
 ##################
 ## BER encoding ##
@@ -25,7 +25,7 @@ from scapy.asn1.asn1 import ASN1_Decoding_Error,ASN1_Encoding_Error,ASN1_BadTag_
 class BER_Exception(Exception):
     pass
 
-class BER_Encoding_Error(ASN1_Encoding_Error):
+class BER_Encoding_Error(ASN1EncodingError):
     def __init__(self, msg, encoded=None, remaining=None):
         Exception.__init__(self, msg)
         self.remaining = remaining
@@ -39,7 +39,7 @@ class BER_Encoding_Error(ASN1_Encoding_Error):
         s+="\n### Remaining ###\n%r" % self.remaining
         return s
 
-class BER_Decoding_Error(ASN1_Decoding_Error):
+class BER_Decoding_Error(ASN1DecodingError):
     def __init__(self, msg, decoded=None, remaining=None):
         Exception.__init__(self, msg)
         self.remaining = remaining
@@ -53,7 +53,7 @@ class BER_Decoding_Error(ASN1_Decoding_Error):
         s+="\n### Remaining ###\n%r" % self.remaining
         return s
 
-class BER_BadTag_Decoding_Error(BER_Decoding_Error, ASN1_BadTag_Decoding_Error):
+class BER_BadTag_Decoding_Error(BER_Decoding_Error, ASN1BadTagDecodingError):
     pass
 
 def BER_len_enc(l, size=0):
@@ -184,7 +184,7 @@ class BERcodec_metaclass(type):
 
 class BERcodec_Object:
     __metaclass__ = BERcodec_metaclass
-    codec = ASN1_Codecs.BER
+    codec = ASN1Codecs.BER
     tag = ASN1_Class_UNIVERSAL.ANY
 
     @classmethod
@@ -230,7 +230,7 @@ class BERcodec_Object:
             if len(t) > 18:
                 t = t[:15]+"..."
             raise BER_Decoding_Error("Unknown prefix [%02x] for [%r]" % (p,t), remaining=s)
-        codec = context[p].get_codec(ASN1_Codecs.BER)
+        codec = context[p].get_codec(ASN1Codecs.BER)
         return codec.dec(s,context,safe)
 
     @classmethod
@@ -244,7 +244,7 @@ class BERcodec_Object:
             return ASN1_BADTAG(o),remain
         except BER_Decoding_Error, e:
             return ASN1_DECODING_ERROR(s, exc=e),""
-        except ASN1_Error, e:
+        except ASN1Error, e:
             return ASN1_DECODING_ERROR(s, exc=e),""
 
     @classmethod
@@ -259,7 +259,7 @@ class BERcodec_Object:
         else:
             return BERcodec_INTEGER.enc(int(s))
 
-ASN1_Codecs.BER.register_stem(BERcodec_Object)
+ASN1Codecs.BER.register_stem(BERcodec_Object)
 
 
 ##########################
