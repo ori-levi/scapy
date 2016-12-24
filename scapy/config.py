@@ -172,6 +172,8 @@ class CacheInstance(dict):
         self.timeout = timeout
         self.name = name
         self._timetable = {}
+    def flush(self):
+        self.__init__(name=self.name, timeout=self.timeout)
     def __getitem__(self, item):
         val = dict.__getitem__(self,item)
         if self.timeout is not None:
@@ -301,6 +303,8 @@ checkIPID: if 0, doesn't check that IPID matches between IP sent and ICMP IP cit
            if 1, checks that they either are equal or byte swapped equals (bug in some IP stacks)
            if 2, strictly checks that they are equals
 checkIPsrc: if 1, checks IP src in IP and ICMP IP citation match (bug in some NAT stacks)
+checkIPinIP: if True, checks that IP-in-IP layers match. If False, do not
+             check IP layers that encapsulates another IP layer
 check_TCPerror_seqack: if 1, also check that TCP seq and ack match the ones in ICMP citation
 iff      : selects the default output interface for srp() and sendp(). default:"eth0")
 verb     : level of verbosity, from 0 (almost mute) to 3 (verbose)
@@ -327,6 +331,7 @@ contribs: a dict which can be used by contrib layers to store local configuratio
     interactive_shell = ""
     stealth = "not implemented"
     iface = None
+    iface6 = None
     readfunc = None
     layers = LayersList()
     commands = CommandsList()
@@ -334,6 +339,7 @@ contribs: a dict which can be used by contrib layers to store local configuratio
     checkIPID = 0
     checkIPsrc = 1
     checkIPaddr = 1
+    checkIPinIP = True
     check_TCPerror_seqack = 0
     verb = 2
     prompt = ">>> "
@@ -380,7 +386,8 @@ contribs: a dict which can be used by contrib layers to store local configuratio
     stats_dot11_protocols = []
     temp_files = []
     netcache = NetCache()
-    geoip_city = '/usr/share/GeoIP/GeoLiteCity.dat'
+    geoip_city = '/usr/share/GeoIP/GeoIPCity.dat'
+    geoip_city_ipv6 = '/usr/share/GeoIP/GeoIPCityv6.dat'
     load_layers = ["l2", "inet", "dhcp", "dns", "dot11", "gprs", "tls",
                    "hsrp", "inet6", "ir", "isakmp", "l2tp", "mgcp",
                    "mobileip", "netbios", "netflow", "ntp", "ppp",
